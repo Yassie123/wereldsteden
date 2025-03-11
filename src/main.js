@@ -9,7 +9,7 @@ import 'swiper/css/pagination';
 
 // DE SWIPER
 // init Swiper:
-const swiper = new Swiper('.swiper', {
+new Swiper('.swiper', {
   // configure Swiper to use modules
   modules: [Navigation, Pagination],
   // Optional parameters
@@ -27,7 +27,6 @@ const swiper = new Swiper('.swiper', {
     prevEl: '.swiper-button-prev',
   },
 });
-swiper;
 //COÖRDINATEN VAN DE STEDEN
 const cityCoordinates = {
   agay: { lat: 43.4256, lon: 6.8379 },
