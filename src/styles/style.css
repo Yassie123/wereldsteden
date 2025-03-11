@@ -47,7 +47,7 @@ div.swiper-slide {
   left: 30px;
   color: white;
   font-family:
-    "Rubik Mono One", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+    'Rubik Mono One', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   font-weight: 400;
   display: flex;
   align-items: center;
@@ -75,7 +75,7 @@ h1 {
   margin: 0;
   padding: 0;
   font-family:
-    "Rubik Mono One", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+    'Rubik Mono One', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   position: absolute;
   bottom: 4%;
   left: 50%;
