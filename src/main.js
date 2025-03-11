@@ -1,33 +1,33 @@
-import { apiKey } from "./secret.js";
-import "./styles/reset.css";
-import "./styles/style.css";
-import Swiper from "swiper";
-import { Navigation, Pagination } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
+import { apiKey } from './secret.js';
+import './styles/reset.css';
+import './styles/style.css';
+import Swiper from 'swiper';
+import { Navigation, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 // DE SWIPER
 // init Swiper:
-const swiper = new Swiper(".swiper", {
+const swiper = new Swiper('.swiper', {
   // configure Swiper to use modules
   modules: [Navigation, Pagination],
   // Optional parameters
-  direction: "horizontal",
+  direction: 'horizontal',
   loop: true,
 
   // If we need pagination
   pagination: {
-    el: ".swiper-pagination",
+    el: '.swiper-pagination',
   },
 
   // Navigation arrows
   navigation: {
-    nextEl: ".swiper-button-next",
-    prevEl: ".swiper-button-prev",
+    nextEl: '.swiper-button-next',
+    prevEl: '.swiper-button-prev',
   },
 });
-
+swiper;
 //COÖRDINATEN VAN DE STEDEN
 const cityCoordinates = {
   agay: { lat: 43.4256, lon: 6.8379 },
@@ -40,16 +40,16 @@ const cityCoordinates = {
 //EIGEN ICONEN
 // op openweathermap heb ik gekeken wat de benamingen zijn van hun default iconen en die heb ik hier dan ingestoken met daarnaast mijn eigen
 const customIcons = {
-  "clear sky": "./public/images/clear.png",
-  "few clouds": "./public/images/cloudy.png",
-  "scattered clouds": "./public/images/scattered.png",
-  "overcast clouds": "./public/images/overcastclouds.png",
-  "broken clouds": "./public/images/broken.png",
-  "shower rain": "./public/images/rain.png",
-  rain: "./public/images/rain.png",
-  thunderstorm: "./public/images/storm.png",
-  snow: "./public/images/snow.png",
-  mist: "./public/images/mist.png",
+  'clear sky': './public/images/clear.png',
+  'few clouds': './public/images/cloudy.png',
+  'scattered clouds': './public/images/scattered.png',
+  'overcast clouds': './public/images/overcastclouds.png',
+  'broken clouds': './public/images/broken.png',
+  'shower rain': './public/images/rain.png',
+  rain: './public/images/rain.png',
+  thunderstorm: './public/images/storm.png',
+  snow: './public/images/snow.png',
+  mist: './public/images/mist.png',
 };
 
 // Temperatuur ophalen van een stad
@@ -74,16 +74,16 @@ async function getWeather(city) {
 }
 
 // Temperatuur en icoontjes toevoegen
-const containers = document.querySelectorAll(".swiper-slide");
+const containers = document.querySelectorAll('.swiper-slide');
 //loopen door de steden coordinaten
 containers.forEach(async (container) => {
   //naam pakken van stad in die loop (op eerste van het h1 element, want er zijn er meerderen)
   const cityName = container
-    .querySelector("h1 > span:first-child")
+    .querySelector('h1 > span:first-child')
     .textContent.trim()
     .toLowerCase();
-  const divTemp = document.createElement("div");
-  divTemp.classList.add("temperatuur");
+  const divTemp = document.createElement('div');
+  divTemp.classList.add('temperatuur');
   // de loader tonen terwijl wordt geladen
   divTemp.innerHTML = `<div class="loader"></div>`;
   container.appendChild(divTemp);
@@ -94,7 +94,7 @@ containers.forEach(async (container) => {
       // eigen icoontje pakken
       const customIcon =
         customIcons[weather.description.toLowerCase()] ||
-        "./public/images/clear.png";
+        './public/images/clear.png';
       console.log(customIcon);
 
       //Temp en icoon tonen
