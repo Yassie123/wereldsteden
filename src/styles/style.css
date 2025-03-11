@@ -1,142 +1,135 @@
 /*bolletjes aanpassen van kleur*/
-:root{
-    --swiper-navigation-color: white;
-    --swiper-pagination-color: rgb(7, 87, 247);
+:root {
+  --swiper-navigation-color: white;
+  --swiper-pagination-color: rgb(7, 87, 247);
 }
 
-body{
-    background-color: #fffbee;
+body {
+  background-color: #fffbee;
 }
 
 /*SWIPER OPMAAK*/
-div.swiper{
-    margin-top: 100px;
-    height: 500px;
-    width: 90%;
-   border-radius: 50px;
-   filter: drop-shadow(10px 10px 4px rgba(216, 216, 213, 0.638));
+div.swiper {
+  margin-top: 100px;
+  height: 500px;
+  width: 90%;
+  border-radius: 50px;
+  filter: drop-shadow(10px 10px 4px rgba(216, 216, 213, 0.638));
 }
 
-
-
-.swiper-slide img{
-    display: block;
-    width: 100%;
-    height: 80%;
-    object-fit: cover;
-
+.swiper-slide img {
+  display: block;
+  width: 100%;
+  height: 80%;
+  object-fit: cover;
 }
 
-div.swiper-wrapper{
-    background-color: rgb(196, 234, 244);
-
+div.swiper-wrapper {
+  background-color: rgb(196, 234, 244);
 }
-div.swiper-slide{
-    background-color: rgb(196, 234, 244);
-
+div.swiper-slide {
+  background-color: rgb(196, 234, 244);
 }
-
-
-
-
 
 /*LOADER OPMAAK*/
 
 .loader {
-    border: 5px solid #ffff; 
-    border-top: 5px solid #fce300; 
-    border-radius: 50%; /* Maak een cirkel */
-    width: 20px;
-    height: 20px;
-    animation: spin 1s linear infinite; 
+  border: 5px solid #ffff;
+  border-top: 5px solid #fce300;
+  border-radius: 50%; /* Maak een cirkel */
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+.temperatuur {
+  position: absolute;
+  top: 20px;
+  left: 30px;
+  color: white;
+  font-family:
+    "Rubik Mono One", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
   }
-  .temperatuur{
-    position: absolute;
-    top: 20px;
-    left: 30px;
-    color: white;
-    font-family: 'Rubik Mono One', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    font-weight: 400;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+  100% {
+    transform: rotate(360deg);
   }
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
+}
 
-  
-  /*IOONTJES*/
-  .temperatuur img {
-    width: 40px; /* Pas de grootte aan naar wens */
-    height: auto;
-  }
-  
-
+/*IOONTJES*/
+.temperatuur img {
+  width: 40px; /* Pas de grootte aan naar wens */
+  height: auto;
+}
 
 /*TITEL ANIMATIE*/
 h1 {
-    text-align: center;
-    margin: 0;
-    padding: 0;
-    font-family: 'Rubik Mono One', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    position: absolute;
-    bottom: 4%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2.4em;
-    color: transparent;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-  }
-  
-  h1 span:nth-child(1) {
-    position: absolute;
-    top: 0;
-    left: 0;
-    color: rgb(7, 87, 247);
-    transition: 0.5s;
-    clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
-    overflow: hidden;
-  }
-  
-  h1:hover span:nth-child(1) {
-    transform: translateY(-18px);
-  }
-  
-  h1 span:nth-child(2) {
-    position: absolute;
-    top: 0;
-    left: 0;
-    color: rgb(7, 87, 247);
-    transition: 0.5s;
-    clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
-    overflow: hidden;
-  }
-  
-  h1:hover span:nth-child(2) {
-    transform: translateY(18px);
-  }
-  
-  h1 span:nth-child(3) {
-    position: absolute;
-    bottom: 9%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-50%) scaleY(0); /* Centraal uitlijnen */
-    width: 100%;
-    color: rgb(7, 87, 247);
-    background: white;
-    font-size: 0.34em;
-    font-weight: 100;
-    letter-spacing: 0.4em;
-    text-align: center;
-    transition: 0.5s;
-  }
-  
-  h1:hover span:nth-child(3) {
-    transform: translateX(-50%) translateY(-50%) scaleY(1); 
-    padding: 2px;
-  }
-  
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  font-family:
+    "Rubik Mono One", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  position: absolute;
+  bottom: 4%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.4em;
+  color: transparent;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+h1 span:nth-child(1) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: rgb(7, 87, 247);
+  transition: 0.5s;
+  clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+  overflow: hidden;
+}
+
+h1:hover span:nth-child(1) {
+  transform: translateY(-18px);
+}
+
+h1 span:nth-child(2) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: rgb(7, 87, 247);
+  transition: 0.5s;
+  clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+  overflow: hidden;
+}
+
+h1:hover span:nth-child(2) {
+  transform: translateY(18px);
+}
+
+h1 span:nth-child(3) {
+  position: absolute;
+  bottom: 9%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%) scaleY(0); /* Centraal uitlijnen */
+  width: 100%;
+  color: rgb(7, 87, 247);
+  background: white;
+  font-size: 0.34em;
+  font-weight: 100;
+  letter-spacing: 0.4em;
+  text-align: center;
+  transition: 0.5s;
+}
+
+h1:hover span:nth-child(3) {
+  transform: translateX(-50%) translateY(-50%) scaleY(1);
+  padding: 2px;
+}
