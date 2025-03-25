@@ -158,10 +158,9 @@ function createGlobe() {
   controls.enableDamping = true;
   controls.dampingFactor = 0.05;
   controls.screenSpacePanning = false;
-  controls.minDistance = 7;
-  controls.maxDistance = 15;
   controls.maxPolarAngle = Math.PI / 1.5;
   controls.minPolarAngle = Math.PI / 3;
+  controls.enableZoom = false;
 
   // Toggle auto-rotation
   controls.autoRotate = ROTATION_SETTINGS.isAutoRotating;
