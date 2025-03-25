@@ -7,6 +7,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 // DE SWIPER
 // init Swiper:
@@ -112,30 +113,211 @@ containers.forEach(async (container) => {
 });
 
 /*threeJS*/
+// Global rotation settings
+const ROTATION_SETTINGS = {
+  autoRotateSpeed: 0.5, // Adjustable auto-rotation speed
+  isAutoRotating: true, // Toggle for automatic rotation
+};
+// Create 3D Globe Visualization
+function createGlobe() {
+  // Scene setup
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000,
+  );
+  const renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    alpha: true, // This makes the background transparent
+  });
+  renderer.setClearColor(0x000000, 0); // Explicitly set transparent background
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000,
-);
+  // Texture loader
+  const textureLoader = new THREE.TextureLoader();
+  const earthTexture = textureLoader.load('public/images/aarde7.webp');
 
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setAnimationLoop(animate);
-document.body.appendChild(renderer.domElement);
+  // Create globe
+  const globeGeometry = new THREE.SphereGeometry(5, 64, 64);
+  const globeMaterial = new THREE.MeshBasicMaterial({ map: earthTexture });
+  const globe = new THREE.Mesh(globeGeometry, globeMaterial);
+  scene.add(globe);
 
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
+  // Group for pins and labels
+  const cityGroup = new THREE.Group();
+  scene.add(cityGroup);
 
-camera.position.z = 5;
+  // Camera positioning
+  camera.position.z = 10;
 
-function animate() {
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
+  // Orbit Controls for mouse interaction
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+  controls.screenSpacePanning = false;
+  controls.minDistance = 7;
+  controls.maxDistance = 15;
+  controls.maxPolarAngle = Math.PI / 1.5;
+  controls.minPolarAngle = Math.PI / 3;
 
-  renderer.render(scene, camera);
+  // Toggle auto-rotation
+  controls.autoRotate = ROTATION_SETTINGS.isAutoRotating;
+  controls.autoRotateSpeed = ROTATION_SETTINGS.autoRotateSpeed;
+
+  // Convert lat/lon to 3D coordinates on a sphere
+  function latLonToVector3(lat, lon, radius) {
+    const phi = (90 - lat) * (Math.PI / 180);
+    const theta = (lon + 180) * (Math.PI / 180);
+
+    return new THREE.Vector3(
+      -radius * Math.sin(phi) * Math.cos(theta),
+      radius * Math.cos(phi),
+      radius * Math.sin(phi) * Math.sin(theta),
+    );
+  }
+
+  async function createCityPins() {
+    for (const [cityKey, cityData] of Object.entries(cityCoordinates)) {
+      // Weather data
+      const weather = await getWeather(cityKey);
+
+      // Pin geometry
+      const pinGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+      const pinMaterial = new THREE.MeshBasicMaterial({
+        color: 'rgb(7, 87, 247)',
+      });
+      const pin = new THREE.Mesh(pinGeometry, pinMaterial);
+
+      // Position pin on globe
+      const pinPosition = latLonToVector3(cityData.lat, cityData.lon, 5.1);
+      pin.position.copy(pinPosition);
+
+      // Line geometry
+      const lineMaterial = new THREE.LineBasicMaterial({
+        color: 'rgb(7, 87, 247)',
+        linewidth: 2,
+      });
+      const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+        pinPosition,
+        pinPosition.clone().multiplyScalar(1.2),
+      ]);
+      const line = new THREE.Line(lineGeometry, lineMaterial);
+
+      // Create label canvas
+      const labelCanvas = document.createElement('canvas');
+      const context = labelCanvas.getContext('2d');
+      labelCanvas.width = 512;
+      labelCanvas.height = 256;
+
+      // Clear canvas
+      context.clearRect(0, 0, labelCanvas.width, labelCanvas.height);
+
+      // Blue background
+      context.fillStyle = 'rgb(14, 55, 137)';
+      context.fillRect(0, 0, labelCanvas.width, labelCanvas.height);
+
+      // Style text
+      context.font = '40px "Rubik Mono One"';
+      context.fillStyle = 'white';
+      context.textAlign = 'center';
+
+      // Write city name
+      context.fillText(cityKey, labelCanvas.width / 2, labelCanvas.height / 4);
+
+      // If weather data is available
+      if (weather) {
+        // Determine custom icon
+        const customIcon =
+          customIcons[weather.description.toLowerCase()] ||
+          './public/images/clear.png';
+
+        // Create an image object to draw the icon
+        const icon = new Image();
+        icon.src = customIcon;
+
+        // Wait for icon to load
+        await new Promise((resolve) => {
+          icon.onload = resolve;
+        });
+
+        // Draw icon
+        context.drawImage(
+          icon,
+          labelCanvas.width / 2 - 50,
+          labelCanvas.height / 2,
+          100,
+          100,
+        );
+
+        // Write temperature
+        context.fillText(
+          `${weather.temp.toFixed(1)}°C`,
+          labelCanvas.width / 2,
+          (3 * labelCanvas.height) / 4,
+        );
+      }
+
+      // Create label texture
+      const labelTexture = new THREE.CanvasTexture(labelCanvas);
+      labelTexture.minFilter = THREE.LinearFilter;
+
+      // Label sprite
+      const labelMaterial = new THREE.SpriteMaterial({
+        map: labelTexture,
+        transparent: true,
+      });
+      const labelSprite = new THREE.Sprite(labelMaterial);
+      labelSprite.scale.set(2, 1, 1);
+
+      // Position label slightly offset from pin
+      labelSprite.position.copy(pinPosition.clone().multiplyScalar(1.2));
+
+      // Add to scene
+      cityGroup.add(pin);
+      cityGroup.add(line);
+      cityGroup.add(labelSprite);
+    }
+  }
+  // Create pins and labels
+  createCityPins();
+
+  // Animation loop
+  function animate() {
+    requestAnimationFrame(animate);
+
+    // Update controls
+    controls.update();
+
+    renderer.render(scene, camera);
+  }
+
+  // Handle window resizing
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(100, 100);
+  });
+
+  // Add controls to toggle auto-rotation and adjust speed
+  window.toggleAutoRotation = () => {
+    ROTATION_SETTINGS.isAutoRotating = !ROTATION_SETTINGS.isAutoRotating;
+    controls.autoRotate = ROTATION_SETTINGS.isAutoRotating;
+  };
+
+  window.adjustRotationSpeed = (speed) => {
+    ROTATION_SETTINGS.autoRotateSpeed = speed;
+    controls.autoRotateSpeed = speed;
+  };
+
+  // Start animation
+  animate();
+
+  // Return controls for potential further manipulation
+  return controls;
 }
+
+// Initialize globe when page loads
+window.addEventListener('load', createGlobe);
