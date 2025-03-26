@@ -177,7 +177,6 @@ function createGlobe() {
       radius * Math.sin(phi) * Math.sin(theta),
     );
   }
-
   async function createCityPins() {
     for (const [cityKey, cityData] of Object.entries(cityCoordinates)) {
       // Weather data
@@ -214,16 +213,35 @@ function createGlobe() {
       // Clear canvas
       context.clearRect(0, 0, labelCanvas.width, labelCanvas.height);
 
-      // Blue background
-      context.fillStyle = 'rgb(14, 55, 137)';
-      context.fillRect(0, 0, labelCanvas.width, labelCanvas.height);
+      // Rounded rectangle function
+      function roundedRect(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + width, y, x + width, y + height, radius);
+        ctx.arcTo(x + width, y + height, x, y + height, radius);
+        ctx.arcTo(x, y + height, x, y, radius);
+        ctx.arcTo(x, y, x + width, y, radius);
+        ctx.closePath();
+      }
+
+      // Blue background with rounded corners
+      context.fillStyle = 'rgba(14, 55, 137, 0.8)';
+      roundedRect(
+        context,
+        10,
+        10,
+        labelCanvas.width - 20,
+        labelCanvas.height - 20,
+        30,
+      );
+      context.fill();
 
       // Style text
       context.font = '40px "Rubik Mono One"';
       context.fillStyle = 'white';
       context.textAlign = 'center';
 
-      // Write city name
+      // Write city name (centered)
       context.fillText(cityKey, labelCanvas.width / 2, labelCanvas.height / 4);
 
       // If weather data is available
@@ -242,19 +260,23 @@ function createGlobe() {
           icon.onload = resolve;
         });
 
+        // Draw icon and temperature
+        context.font = '30px "Rubik Mono One"';
+        const temperatureText = `${weather.temp.toFixed(1)}°C`;
+
         // Draw icon
         context.drawImage(
           icon,
-          labelCanvas.width / 2 - 50,
-          labelCanvas.height / 2,
+          labelCanvas.width / 2.4 - 100, // Centered horizontally with temperature
+          (2.8 * labelCanvas.height) / 4 - 50, // Centered vertically
           100,
           100,
         );
 
-        // Write temperature
+        // Draw temperature text
         context.fillText(
-          `${weather.temp.toFixed(1)}°C`,
-          labelCanvas.width / 2,
+          temperatureText,
+          labelCanvas.width / 2 + 50, // Next to the icon
           (3 * labelCanvas.height) / 4,
         );
       }
