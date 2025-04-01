@@ -117,8 +117,8 @@ containers.forEach(async (container) => {
 const ROTATION_SETTINGS = {
   autoRotateSpeed: 0.5, // Adjustable auto-rotation speed
   isAutoRotating: true, // Toggle for automatic rotation
-};
-// Create 3D Globe Visualization
+  currentPlanet: 'earth', // Add this to track which planet is showing
+}; // Create 3D Globe Visualization
 function createGlobe() {
   // Scene setup
   const scene = new THREE.Scene();
@@ -130,20 +130,28 @@ function createGlobe() {
   );
   const renderer = new THREE.WebGLRenderer({
     antialias: true,
-    alpha: true, // This makes the background transparent
+    alpha: true,
   });
-  renderer.setClearColor(0x000000, 0); // Explicitly set transparent background
+  renderer.setClearColor(0x000000, 0);
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
   // Texture loader
   const textureLoader = new THREE.TextureLoader();
   const earthTexture = textureLoader.load('public/images/aarde7.webp');
+  const moonPlanetTexture = textureLoader.load('public/images/moon.jpg'); // Add your face texture
 
   // Create globe
   const globeGeometry = new THREE.SphereGeometry(5, 64, 64);
-  const globeMaterial = new THREE.MeshBasicMaterial({ map: earthTexture });
-  const globe = new THREE.Mesh(globeGeometry, globeMaterial);
+
+  // Create both materials but only use one at first
+  const earthMaterial = new THREE.MeshBasicMaterial({ map: earthTexture });
+  const moonMaterial = new THREE.MeshBasicMaterial({
+    map: moonPlanetTexture,
+  });
+
+  // Start with Earth
+  const globe = new THREE.Mesh(globeGeometry, earthMaterial);
   scene.add(globe);
 
   // Group for pins and labels
@@ -177,141 +185,199 @@ function createGlobe() {
       radius * Math.sin(phi) * Math.sin(theta),
     );
   }
+
   async function createCityPins() {
-    for (const [cityKey, cityData] of Object.entries(cityCoordinates)) {
-      // Weather data
-      const weather = await getWeather(cityKey);
+    // Clear existing pins first
+    while (cityGroup.children.length > 0) {
+      cityGroup.remove(cityGroup.children[0]);
+    }
 
-      // Pin geometry
-      const pinGeometry = new THREE.SphereGeometry(0.1, 16, 16);
-      const pinMaterial = new THREE.MeshBasicMaterial({
-        color: 'rgb(7, 87, 247)',
-      });
-      const pin = new THREE.Mesh(pinGeometry, pinMaterial);
+    // Only create pins for Earth, not for moon Planet
+    if (ROTATION_SETTINGS.currentPlanet === 'earth') {
+      for (const [cityKey, cityData] of Object.entries(cityCoordinates)) {
+        // Weather data
+        const weather = await getWeather(cityKey);
 
-      // Position pin on globe
-      const pinPosition = latLonToVector3(cityData.lat, cityData.lon, 5.1);
-      pin.position.copy(pinPosition);
-
-      // Line geometry
-      const lineMaterial = new THREE.LineBasicMaterial({
-        color: 'rgb(7, 87, 247)',
-        linewidth: 2,
-      });
-      const lineGeometry = new THREE.BufferGeometry().setFromPoints([
-        pinPosition,
-        pinPosition.clone().multiplyScalar(1.2),
-      ]);
-      const line = new THREE.Line(lineGeometry, lineMaterial);
-
-      // Create label canvas
-      const labelCanvas = document.createElement('canvas');
-      const context = labelCanvas.getContext('2d');
-      labelCanvas.width = 512;
-      labelCanvas.height = 256;
-
-      // Clear canvas
-      context.clearRect(0, 0, labelCanvas.width, labelCanvas.height);
-
-      // Rounded rectangle function
-      function roundedRect(ctx, x, y, width, height, radius) {
-        ctx.beginPath();
-        ctx.moveTo(x + radius, y);
-        ctx.arcTo(x + width, y, x + width, y + height, radius);
-        ctx.arcTo(x + width, y + height, x, y + height, radius);
-        ctx.arcTo(x, y + height, x, y, radius);
-        ctx.arcTo(x, y, x + width, y, radius);
-        ctx.closePath();
-      }
-
-      // Blue background with rounded corners
-      context.fillStyle = 'rgba(14, 55, 137, 0.8)';
-      roundedRect(
-        context,
-        10,
-        10,
-        labelCanvas.width - 20,
-        labelCanvas.height - 20,
-        30,
-      );
-      context.fill();
-
-      // Style text
-      context.font = '40px "Rubik Mono One"';
-      context.fillStyle = 'white';
-      context.textAlign = 'center';
-
-      // Write city name (centered)
-      context.fillText(cityKey, labelCanvas.width / 2, labelCanvas.height / 4);
-
-      // If weather data is available
-      if (weather) {
-        // Determine custom icon
-        const customIcon =
-          customIcons[weather.description.toLowerCase()] ||
-          './public/images/clear.png';
-
-        // Create an image object to draw the icon
-        const icon = new Image();
-        icon.src = customIcon;
-
-        // Wait for icon to load
-        await new Promise((resolve) => {
-          icon.onload = resolve;
+        // Pin geometry
+        const pinGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+        const pinMaterial = new THREE.MeshBasicMaterial({
+          color: 'rgb(7, 87, 247)',
         });
+        const pin = new THREE.Mesh(pinGeometry, pinMaterial);
 
-        // Draw icon and temperature
-        context.font = '30px "Rubik Mono One"';
-        const temperatureText = `${weather.temp.toFixed(1)}°C`;
+        // Position pin on globe
+        const pinPosition = latLonToVector3(cityData.lat, cityData.lon, 5.1);
+        pin.position.copy(pinPosition);
 
-        // Draw icon
-        context.drawImage(
-          icon,
-          labelCanvas.width / 2.4 - 100, // Centered horizontally with temperature
-          (2.8 * labelCanvas.height) / 4 - 50, // Centered vertically
-          100,
-          100,
+        // Line geometry
+        const lineMaterial = new THREE.LineBasicMaterial({
+          color: 'rgb(7, 87, 247)',
+          linewidth: 2,
+        });
+        const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+          pinPosition,
+          pinPosition.clone().multiplyScalar(1.2),
+        ]);
+        const line = new THREE.Line(lineGeometry, lineMaterial);
+
+        // Create label canvas
+        const labelCanvas = document.createElement('canvas');
+        const context = labelCanvas.getContext('2d');
+        labelCanvas.width = 512;
+        labelCanvas.height = 256;
+
+        // Clear canvas
+        context.clearRect(0, 0, labelCanvas.width, labelCanvas.height);
+
+        // Rounded rectangle function
+        function roundedRect(ctx, x, y, width, height, radius) {
+          ctx.beginPath();
+          ctx.moveTo(x + radius, y);
+          ctx.arcTo(x + width, y, x + width, y + height, radius);
+          ctx.arcTo(x + width, y + height, x, y + height, radius);
+          ctx.arcTo(x, y + height, x, y, radius);
+          ctx.arcTo(x, y, x + width, y, radius);
+          ctx.closePath();
+        }
+
+        // Blue background with rounded corners
+        context.fillStyle = 'rgba(14, 55, 137, 0.8)';
+        roundedRect(
+          context,
+          10,
+          10,
+          labelCanvas.width - 20,
+          labelCanvas.height - 20,
+          30,
         );
+        context.fill();
 
-        // Draw temperature text
+        // Style text
+        context.font = '40px "Rubik Mono One"';
+        context.fillStyle = 'white';
+        context.textAlign = 'center';
+
+        // Write city name (centered)
         context.fillText(
-          temperatureText,
-          labelCanvas.width / 2 + 50, // Next to the icon
-          (3 * labelCanvas.height) / 4,
+          cityKey,
+          labelCanvas.width / 2,
+          labelCanvas.height / 4,
         );
+
+        // If weather data is available
+        if (weather) {
+          // Determine custom icon
+          const customIcon =
+            customIcons[weather.description.toLowerCase()] ||
+            './public/images/clear.png';
+
+          // Create an image object to draw the icon
+          const icon = new Image();
+          icon.src = customIcon;
+
+          // Wait for icon to load
+          await new Promise((resolve) => {
+            icon.onload = resolve;
+          });
+
+          // Draw icon and temperature
+          context.font = '30px "Rubik Mono One"';
+          const temperatureText = `${weather.temp.toFixed(1)}°C`;
+
+          // Calculate icon size maintaining aspect ratio
+          const maxIconSize = 100; // Maximum icon size
+          const iconAspectRatio = icon.width / icon.height;
+          let iconWidth, iconHeight;
+
+          if (icon.width > icon.height) {
+            iconWidth = maxIconSize;
+            iconHeight = maxIconSize / iconAspectRatio;
+          } else {
+            iconHeight = maxIconSize;
+            iconWidth = maxIconSize * iconAspectRatio;
+          }
+
+          // Draw icon centered
+          context.drawImage(
+            icon,
+            labelCanvas.width / 3.5 - iconWidth / 2, // Centered horizontally
+            (2.8 * labelCanvas.height) / 4 - iconHeight / 2, // Centered vertically
+            iconWidth,
+            iconHeight,
+          );
+
+          // Draw temperature text
+          context.fillText(
+            temperatureText,
+            labelCanvas.width / 2 + 50, // Next to the icon
+            (3 * labelCanvas.height) / 4,
+          );
+        }
+
+        // Create label texture
+        const labelTexture = new THREE.CanvasTexture(labelCanvas);
+        labelTexture.minFilter = THREE.LinearFilter;
+
+        // Label sprite
+        const labelMaterial = new THREE.SpriteMaterial({
+          map: labelTexture,
+          transparent: true,
+        });
+        const labelSprite = new THREE.Sprite(labelMaterial);
+        labelSprite.scale.set(2, 1, 1);
+
+        // Position label slightly offset from pin
+        labelSprite.position.copy(pinPosition.clone().multiplyScalar(1.2));
+
+        // Add to scene
+        cityGroup.add(pin);
+        cityGroup.add(line);
+        cityGroup.add(labelSprite);
       }
-
-      // Create label texture
-      const labelTexture = new THREE.CanvasTexture(labelCanvas);
-      labelTexture.minFilter = THREE.LinearFilter;
-
-      // Label sprite
-      const labelMaterial = new THREE.SpriteMaterial({
-        map: labelTexture,
-        transparent: true,
-      });
-      const labelSprite = new THREE.Sprite(labelMaterial);
-      labelSprite.scale.set(2, 1, 1);
-
-      // Position label slightly offset from pin
-      labelSprite.position.copy(pinPosition.clone().multiplyScalar(1.2));
-
-      // Add to scene
-      cityGroup.add(pin);
-      cityGroup.add(line);
-      cityGroup.add(labelSprite);
     }
   }
+
   // Create pins and labels
   createCityPins();
+
+  // Add toggle button to UI
+  const toggleButton = document.createElement('button');
+  toggleButton.textContent = 'Toggle Planet';
+  toggleButton.classList.add('planet-toggle');
+  toggleButton.style.position = 'absolute';
+  toggleButton.style.top = '650px';
+  toggleButton.style.right = '80px';
+  toggleButton.style.zIndex = '1000';
+  toggleButton.style.padding = '10px 15px';
+  toggleButton.style.backgroundColor = 'rgba(14, 55, 137, 0.8)';
+  toggleButton.style.color = 'white';
+  toggleButton.style.border = 'none';
+  toggleButton.style.borderRadius = '5px';
+  toggleButton.style.cursor = 'pointer';
+  toggleButton.style.fontFamily = '"Rubik Mono One", sans-serif';
+  document.body.appendChild(toggleButton);
+
+  // Toggle between Earth and moon Planet
+  toggleButton.addEventListener('click', () => {
+    if (ROTATION_SETTINGS.currentPlanet === 'earth') {
+      // Switch to moon Planet
+      globe.material = moonMaterial;
+      ROTATION_SETTINGS.currentPlanet = 'moon';
+      // Remove all city pins and labels
+      createCityPins();
+    } else {
+      // Switch back to Earth
+      globe.material = earthMaterial;
+      ROTATION_SETTINGS.currentPlanet = 'earth';
+      // Recreate the city pins and labels
+      createCityPins();
+    }
+  });
 
   // Animation loop
   function animate() {
     requestAnimationFrame(animate);
-
-    // Update controls
     controls.update();
-
     renderer.render(scene, camera);
   }
 
@@ -319,15 +385,16 @@ function createGlobe() {
   window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(100, 100);
+    renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
-  // Add controls to toggle auto-rotation and adjust speed
+  // Toggle auto-rotation function
   window.toggleAutoRotation = () => {
     ROTATION_SETTINGS.isAutoRotating = !ROTATION_SETTINGS.isAutoRotating;
     controls.autoRotate = ROTATION_SETTINGS.isAutoRotating;
   };
 
+  // Adjust rotation speed function
   window.adjustRotationSpeed = (speed) => {
     ROTATION_SETTINGS.autoRotateSpeed = speed;
     controls.autoRotateSpeed = speed;
