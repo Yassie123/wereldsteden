@@ -13,16 +13,13 @@
     <title>Wereldsteden</title>
   </head>
   <body>
-    <!-- Slider main container -->
-    <div class="swiper">
+    <!-- Earth Slider container -->
+    <div class="swiper earth-swiper">
       <!-- Additional required wrapper -->
       <div class="swiper-wrapper">
         <!-- Slides -->
         <div class="swiper-slide">
           <img src="public/images/agay.png" alt="agay" />
-          <!-- Hier had ik een h1 teveel staan, die heb ik weg gedaan -->
-          <!-- De rest van wat er in de h1 staat ziet er misschien raar uit, maar is noodzakelijk voor de animatie die op de titel zit -->
-          <!-- Als je erover hovert splitst de stad en zie je het land -->
           <h1>
             Agay
             <span>Agay</span>
@@ -64,6 +61,50 @@
             <span>LasVegas</span>
             <span>LasVegas</span>
             <span>America</span>
+          </h1>
+        </div>
+      </div>
+      <!-- If we need pagination -->
+      <div class="swiper-pagination"></div>
+
+      <!-- If we need navigation buttons -->
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+
+      <!-- If we need scrollbar -->
+      <div class="swiper-scrollbar"></div>
+    </div>
+
+    <!-- Moon Slider container (initially hidden) -->
+    <div class="swiper moon-swiper" style="display: none">
+      <!-- Additional required wrapper -->
+      <div class="swiper-wrapper">
+        <!-- Moon slides -->
+        <div class="swiper-slide">
+          <img src="public/images/mare.jpg" alt="Sea of Tranquility" />
+          <h1>
+            Tranquillitatis
+            <span>Tranquillitatis</span>
+            <span>Tranquillitatis</span>
+            <span>Moon</span>
+          </h1>
+        </div>
+        <div class="swiper-slide">
+          <img src="public/images/cooper.jpg" alt="Copernicus Crater" />
+          <h1>
+            Copernicus Crater
+            <span>Copernicus Crater</span>
+            <span>Copernicus Crater</span>
+            <span>Moon</span>
+          </h1>
+        </div>
+        <div class="swiper-slide">
+          <img src="public/images/tycho.jpg" alt="Tycho Crater" />
+          <h1>
+            Tycho Crater
+            <span>Tycho Crater</span>
+            <span>Tycho Crater</span>
+            <span>Moon</span>
           </h1>
         </div>
       </div>

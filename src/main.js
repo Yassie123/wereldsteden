@@ -9,26 +9,37 @@ import 'swiper/css/pagination';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
-// DE SWIPER
-// init Swiper:
-new Swiper('.swiper', {
-  // configure Swiper to use modules
+// Initialize Swipers
+let earthSwiper, moonSwiper;
+
+// Initialize Earth Swiper
+earthSwiper = new Swiper('.earth-swiper', {
   modules: [Navigation, Pagination],
-  // Optional parameters
   direction: 'horizontal',
   loop: true,
-
-  // If we need pagination
   pagination: {
     el: '.swiper-pagination',
   },
-
-  // Navigation arrows
   navigation: {
     nextEl: '.swiper-button-next',
     prevEl: '.swiper-button-prev',
   },
 });
+
+// Initialize Moon Swiper
+moonSwiper = new Swiper('.moon-swiper', {
+  modules: [Navigation, Pagination],
+  direction: 'horizontal',
+  loop: true,
+  pagination: {
+    el: '.swiper-pagination',
+  },
+  navigation: {
+    nextEl: '.swiper-button-next',
+    prevEl: '.swiper-button-prev',
+  },
+});
+
 //COÖRDINATEN VAN DE STEDEN
 const cityCoordinates = {
   agay: { lat: 43.4256, lon: 6.8379 },
@@ -36,6 +47,13 @@ const cityCoordinates = {
   gizeh: { lat: 29.9773, lon: 31.1325 },
   seoul: { lat: 37.566535, lon: 126.9779692 },
   lasvegas: { lat: 36.1699, lon: -115.1398 },
+};
+
+// Moon locations with their fictional temperatures
+const moonLocations = {
+  'sea of tranquility': { temp: -173, description: 'clear sky' },
+  'copernicus crater': { temp: -183, description: 'clear sky' },
+  'tycho crater': { temp: -178, description: 'clear sky' },
 };
 
 //EIGEN ICONEN
@@ -74,42 +92,66 @@ async function getWeather(city) {
   }
 }
 
-// Temperatuur en icoontjes toevoegen
-const containers = document.querySelectorAll('.swiper-slide');
-//loopen door de steden coordinaten
-containers.forEach(async (container) => {
-  //naam pakken van stad in die loop (op eerste van het h1 element, want er zijn er meerderen)
+// Add temperature to Earth slides
+const earthContainers = document.querySelectorAll(
+  '.earth-swiper .swiper-slide',
+);
+earthContainers.forEach(async (container) => {
   const cityName = container
     .querySelector('h1 > span:first-child')
     .textContent.trim()
     .toLowerCase();
   const divTemp = document.createElement('div');
   divTemp.classList.add('temperatuur');
-  // de loader tonen terwijl wordt geladen
   divTemp.innerHTML = `<div class="loader"></div>`;
   container.appendChild(divTemp);
 
   if (cityCoordinates[cityName]) {
     const weather = await getWeather(cityName);
     if (weather !== null) {
-      // eigen icoontje pakken
       const customIcon =
         customIcons[weather.description.toLowerCase()] ||
         './public/images/clear.png';
-      console.log(customIcon);
 
-      //Temp en icoon tonen
       divTemp.innerHTML = `
         <img src="${customIcon}" alt="${weather.description}" title="${weather.description}" />
-       <p>${weather.temp.toFixed(1)}°C</p>
-
+        <p>${weather.temp.toFixed(1)}°C</p>
       `;
     } else {
-      divTemp.innerHTML = `Geen weer-data`; //foutmelding
+      divTemp.innerHTML = `Geen weer-data`;
     }
   } else {
-    divTemp.innerHTML = `Geen coördinaten`; // foutmelding als de stad niet bekend is
+    divTemp.innerHTML = `Geen coördinaten`;
   }
+});
+
+// Add temperature to Moon slides
+const moonContainers = document.querySelectorAll('.moon-swiper .swiper-slide');
+moonContainers.forEach((container) => {
+  const locationName = container
+    .querySelector('h1 > span:first-child')
+    .textContent.trim()
+    .toLowerCase();
+
+  const divTemp = document.createElement('div');
+  divTemp.classList.add('temperatuur');
+
+  // Get moon location info or use default
+  const locationInfo = moonLocations[locationName] || {
+    temp: -180,
+    description: 'clear sky',
+  };
+
+  // Get icon for moon (always clear sky)
+  const customIcon =
+    customIcons[locationInfo.description] || './public/images/clear.png';
+
+  divTemp.innerHTML = `
+    <img src="${customIcon}" alt="${locationInfo.description}" title="${locationInfo.description}" />
+    <p>${locationInfo.temp}°C</p>
+  `;
+
+  container.appendChild(divTemp);
 });
 
 /*threeJS*/
@@ -139,7 +181,7 @@ function createGlobe() {
   // Texture loader
   const textureLoader = new THREE.TextureLoader();
   const earthTexture = textureLoader.load('public/images/aarde7.webp');
-  const moonPlanetTexture = textureLoader.load('public/images/moon.jpg'); // Add your face texture
+  const moonPlanetTexture = textureLoader.load('public/images/moon.jpg');
 
   // Create globe
   const globeGeometry = new THREE.SphereGeometry(5, 64, 64);
@@ -340,16 +382,39 @@ function createGlobe() {
   // Create pins and labels
   createCityPins();
 
+  // Initial state check to ensure correct swiper is showing
+  syncSwiperWithPlanet();
+
+  // Function to sync swiper with current planet
+  function syncSwiperWithPlanet() {
+    const earthSwiperElement = document.querySelector('.earth-swiper');
+    const moonSwiperElement = document.querySelector('.moon-swiper');
+
+    if (ROTATION_SETTINGS.currentPlanet === 'moon') {
+      // Show Moon swiper, hide Earth swiper
+      earthSwiperElement.style.display = 'none';
+      moonSwiperElement.style.display = 'block';
+      // Update the Moon swiper to refresh it
+      moonSwiper.update();
+    } else {
+      // Show Earth swiper, hide Moon swiper
+      moonSwiperElement.style.display = 'none';
+      earthSwiperElement.style.display = 'block';
+      // Update the Earth swiper to refresh it
+      earthSwiper.update();
+    }
+  }
+
   // Add toggle button to UI
   const toggleButton = document.createElement('button');
-  toggleButton.textContent = 'Toggle Planet';
+  toggleButton.textContent = 'Wissel van planeet';
   toggleButton.classList.add('planet-toggle');
   toggleButton.style.position = 'absolute';
   toggleButton.style.top = '650px';
   toggleButton.style.right = '80px';
   toggleButton.style.zIndex = '1000';
   toggleButton.style.padding = '10px 15px';
-  toggleButton.style.backgroundColor = 'rgba(14, 55, 137, 0.8)';
+  toggleButton.style.backgroundColor = 'rgb(7, 87, 247)';
   toggleButton.style.color = 'white';
   toggleButton.style.border = 'none';
   toggleButton.style.borderRadius = '5px';
@@ -372,6 +437,9 @@ function createGlobe() {
       // Recreate the city pins and labels
       createCityPins();
     }
+
+    // Sync the swiper with the current planet
+    syncSwiperWithPlanet();
   });
 
   // Animation loop

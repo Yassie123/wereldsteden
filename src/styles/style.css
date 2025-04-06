@@ -16,7 +16,20 @@ div.swiper {
   border-radius: 50px;
   filter: drop-shadow(10px 10px 4px rgba(216, 216, 213, 0.638));
 }
+/* Add this to your style.css file */
+.earth-swiper,
+.moon-swiper {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 
+/* Initially hide the moon swiper */
+.moon-swiper {
+  display: none;
+}
 .swiper-slide img {
   display: block;
   width: 100%;
