@@ -8,7 +8,7 @@ body {
   background-color: #fffbee;
 }
 
-/*SWIPER OPMAAK*/
+/*SWIPER OPMAAK MAAN EN AARDE*/
 div.swiper {
   margin-top: 100px;
   height: 500px;
@@ -16,7 +16,7 @@ div.swiper {
   border-radius: 50px;
   filter: drop-shadow(10px 10px 4px rgba(216, 216, 213, 0.638));
 }
-/* Add this to your style.css file */
+
 .earth-swiper,
 .moon-swiper {
   width: 100%;
@@ -26,7 +26,6 @@ div.swiper {
   left: 0;
 }
 
-/* Initially hide the moon swiper */
 .moon-swiper {
   display: none;
 }
